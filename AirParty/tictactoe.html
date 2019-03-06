@@ -1,0 +1,332 @@
+﻿
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+     <title></title>
+</head>
+<body>
+     <table id="canvas"></table>
+     <div id="scoreboard">
+         <div id="sbp1" class="scoreboardp1">p1 heeft 0 punten</div>
+         <div id="sbp2" class="scoreboardp2">p2 heeft 0 punten</div>
+         <div id="restartBtn" onclick="resetGame()">restart</div>
+     </div>
+</body>
+<style>
+     html, body {
+         overflow: hidden;
+         all: unset;
+         width: 100vw;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+     }
+     #canvas {
+         width: 100vh;
+         height: 100vh;
+     }
+     .table {
+         display: inline-block;
+         box-shadow: inset 0 0 0 3px #121212;
+         width: calc(100%/3);
+         height: calc(100%/3);
+         float: left;
+     }
+     .row {
+         height: calc(100% / 3);
+         display: flex;
+     }
+     .column {
+         box-shadow: inset 0 0 0 2px #121212;
+         width: calc(100% / 3);
+     }
+     /* ---OPMAKEN--- */
+     #scoreboard{
+         padding: 5vw;
+         border-radius: 1vh;
+         background: #efefef;
+     }
+     #restartBtn {
+         margin-top: 1vh;
+         padding: 0.2vw;
+         border: black 2px solid;
+         font-size: 4vh;
+         text-align: center;
+         color: #121212;
+         font-weight: 800;
+     }
+     /* player 1 */
+     .cursorp1 {
+         box-shadow: inset 0 0 0 2px red;
+         background: transparent;
+     }
+     .clickZonep1 {
+         box-shadow: inset 0 0 0 5px red;
+     }
+     .capturedZonep1 {
+         box-shadow: inset 0 0 0 5px red;
+         background: fill red;
+     }
+     .scoreboardp1{
+         font-size: 4vh;
+         color: red;
+         font-weight: 900;
+     }
+     /* player 2 */
+     .cursorp2 {
+         box-shadow: inset 0 0 0 2px blue;
+         background: transparent;
+     }
+     .clickZonep2 {
+         box-shadow: inset 0 0 0 5px blue;
+     }
+     .capturedZonep2 {
+         box-shadow: inset 0 0 0 5px blue;
+         background: fill blue;
+     }
+     .scoreboardp2 {
+         font-size: 4vh;
+         color: blue;
+         font-weight: 900;
+     }
+
+
+
+</style>
+
+<script>
+     let canvas = document.getElementById("canvas");
+     let activeTable = 0;
+     let playersTurn = null;
+     let sb = {
+         "p1": 0,
+         "p2": 0
+     }
+     let tblsCapArr =[0, 0, 0,
+                      0, 0, 0,
+                      0, 0, 0]
+     let turns = 0;
+
+     // draw canvas
+     function startGame() {
+         drawTable();
+
+         activeTable = Math.floor(Math.random() * Math.floor(9));
+         playersTurn = ['p1', 'p2'][Math.floor(Math.random() * 
+Math.floor(2))]
+document.getElementsByClassName("table")[activeTable].className = `table 
+clickZone${playersTurn}`
+     }
+
+     function resetGame() {
+         activeTable = 0;
+         playersTurn = null;
+         sb = {
+             "p1": 0,
+             "p2": 0
+         }
+         tblsCapArr = [0, 0, 0,
+             0, 0, 0,
+             0, 0, 0]
+         turns = 0;
+         canvas.innerHTML = '';
+         updateSB();
+         startGame();
+     }
+
+     function drawTable() {
+         for (let i = 0; i < 9; i++) {
+             let table = document.createElement("div");
+             table.className = "table";
+             table.count = i;
+             let tableContent = new drawContent(table);
+             canvas.appendChild(table);
+         }
+     }
+
+     function drawContent(table) {
+         for (let i = 0; i < 3; i++) {
+             let row = document.createElement("div");
+             row.className = "row";
+             row.count = i;
+             table.appendChild(row);
+             for (let j = 0; j < 3; j++) {
+                 let column = document.createElement("div");
+                 column.className = "column";
+                 column.count = j;
+                 column.addEventListener("click", clicked)
+                 row.appendChild(column);
+             }
+         }
+     }
+
+     // edit canvas
+     function clicked(clickData) {
+         let clickedColumn = clickData.target;
+         let clickedRow = clickedColumn.parentElement;
+         let clickedTable = clickedRow.parentElement;
+
+         if (activeTable == clickedTable.count && 
+			clickedColumn.className.length == 6) {
+
+             if (playersTurn == 'p1') {
+                 thisTurn('p1', clickedColumn, clickedRow, clickedTable)
+                 checkGame('p1', clickedTable);
+                 nextTurn('p1', clickedColumn, clickedRow, clickedTable)
+                 updateSB()
+                 playersTurn = 'p2';
+             } else {
+                 thisTurn('p2', clickedColumn, clickedRow, clickedTable)
+                 checkGame('p2', clickedTable);
+                 nextTurn('p2', clickedColumn, clickedRow, clickedTable)
+                 updateSB()
+                 playersTurn = 'p1'
+             }
+
+         }
+     }
+     function thisTurn(player, clickedColumn, clickedRow, clickedTable){
+         clickedColumn.className = `column cursor${player}`
+         clickedTable.className = "table";
+     }
+     function nextTurn(player, clickedColumn, clickedRow, clickedTable) {
+         activeTable = clickedRow.count * 3 + clickedColumn.count;
+         let reversed; if (player == 'p1') { reversed = 'p2' } else { 
+reversed = 'p1' } //reverse
+         let nexttable = 
+document.getElementsByClassName("table")[activeTable];
+         if (nexttable.className.length > 'table'.length) {
+             let randomTable = findrandomtable();
+             activeTable = randomTable;
+             setTimeout(() => {
+console.log(document.getElementsByClassName("table")[activeTable], 
+randomTable, activeTable, reversed)
+document.getElementsByClassName("table")[activeTable].className = `table 
+clickZone${reversed}`
+             },500)
+         } else {
+             nexttable.className = `table clickZone${reversed}`
+         }
+     }
+     function findrandomtable() {
+         // niet eind resultaad
+         let i = 0;
+         while (i < 9) {
+             if (tblsCapArr[i] == 0) {
+                 stop;
+                 return i
+             }
+             i++
+         }
+
+         //let randomNumber = Math.floor(Math.random() * Math.floor(9))
+         //if (tblsCapArr[randomNumber] == 0) {
+         //    return randomNumber
+         //} else {
+         //    findrandomtable()
+         //}
+     }
+     // rules
+     function checkGame(player, clickedTable) {
+         let tableArr = [];
+         let table = clickedTable;
+         for (let i = 0; i < 3; i++) {
+             for (let j = 0; j < 3; j++) {
+                 if (table.children[i].children[j].className == `column 
+cursor${player}`) {
+                     tableArr.push(1)
+                 } else {
+                     tableArr.push(0)
+                 }
+             }
+         }
+         if (compledHor(tableArr) == true || compledVer(tableArr) == 
+true || compledDia(tableArr) == true)  {
+             sb[player] += 1;
+             let i = clickedTable.count;
+             tblsCapArr[i] = player
+             clickedTable.className = `table capturedZone${player}`
+         }
+
+         if (compledHor(tblsCapArr) == true || compledVer(tblsCapArr) == 
+true || compledDia(tblsCapArr) == true) {
+             gameover(player)
+         }
+
+         if (sb.p1 + sb.p2 == 9) {
+             gameover();
+         }
+     }
+     function compledHor(tableArr) {
+         let i = 0;
+         while (i < 3) {
+             let points = 0;
+             let j = 0;
+             while (j < 3) {
+                 if (tableArr[(j + i*3)] == 1) {
+                     points += 1
+                 }
+                 j++
+             }
+             if (points == 3) {
+                 stop;
+                 return true
+             }
+             i++
+         }
+     }
+     function compledVer(tableArr) {
+         let i = 0;
+         while (i < 3) {
+             let points = 0;
+             let j = 0;
+             while (j < 3) {
+                 if (tableArr[(i + j * 3)] == 1) {
+                     points += 1
+                 }
+                 j++
+             }
+             if (points == 3) {
+                 stop;
+                 return true
+             }
+             i++
+         }
+     }
+     function compledDia(tableArr) {
+
+         if (tableArr[0] == 1 && tableArr[4] == 1 && tableArr[8] == 1) {
+             return true
+         } else if (tableArr[2] == 1 && tableArr[4] == 1 && tableArr[6] 
+== 1) {
+             return true
+         }
+
+     }
+     // end game
+     function gameover(player) {
+         if (player) {
+             console.log(`${player} won the game!`)
+         } else {
+             if (sb.p1 > sb.p2) {
+                 console.log(`p1 won the game!`)
+             } else if (sb.p1 < sb.p2) {
+                 console.log(`p2 won the game!`)
+             }else {
+                 console.log(`Its a draw!`)
+             }
+         }
+     }
+     // scoreboard
+     const scoreboardDiv = document.getElementById("scoreboard")
+     const sbp1 = document.getElementById("sbp1")
+     const sbp2 = document.getElementById("sbp2")
+     function updateSB() {
+         sbp1.innerHTML = `p1 heeft ${sb.p1} punten`
+         sbp2.innerHTML = `p2 heeft ${sb.p2} punten`
+     }
+
+     startGame()
+</script>
+</html>
+
+

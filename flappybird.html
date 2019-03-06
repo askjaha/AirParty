@@ -1,0 +1,70 @@
+﻿
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+	<div id="canvas"></div>
+</body>
+<style>
+     html, body {
+         overflow: hidden;
+         all: unset;
+         width: 100vw;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+     }
+     #canvas {
+         width: 100vw;
+         height: vh;
+		 background-color: #b3ccff;
+		 display: flex;
+         justify-content: center;
+         align-items: center;
+     }
+
+	 #player {
+	 width:5vh;
+	 height:5vh;
+	 border-radius:5vh;
+   	 background:yellow;
+	 position: absolute;
+	 }
+
+
+</style>
+
+<script>
+
+	let canvas = document.getElementById("canvas");
+   
+    let ball;
+     function startGame() {
+	 ball = document.createElement("div")
+	 ball.id="player"
+	 canvas.appendChild(ball)
+	}
+	 startGame()
+	
+	let force = 9.8;
+	let canvasHeight = window.innerHeight
+	let posY = canvasHeight / 2;
+
+	 function gravity(){
+		posY = posY - force;
+	 }
+
+	 setInterval(()=>{
+	 if(posY < -canvasHeight/2){
+		console.log(canvasHeight )
+	 }else{
+		gravity()
+		ball.style.bottom = posY + 'px` 
+	 }
+	 }, 20)
+
+</script>
+
+</html>
